@@ -1,16 +1,16 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Contact implements XmlSerializable
 {
-    protected $name;
-    protected $telephone;
-    protected $telefax;
-    protected $electronicMail;
+    protected ?string $name = null;
+    protected ?string $telephone = null;
+    protected ?string $telefax = null;
+    protected ?string $electronicMail = null;
 
     /**
      * @return string

@@ -1,20 +1,20 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class TaxScheme implements XmlSerializable
 {
-    protected $id;
-    protected $taxTypeCode;
-    protected $name;
+    protected ?string $id = null;
+    protected ?string $taxTypeCode = null;
+    protected ?string $name = null;
 
     /**
      * @return string
      */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }

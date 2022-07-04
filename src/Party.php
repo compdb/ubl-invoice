@@ -1,19 +1,20 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Party implements XmlSerializable
 {
-    protected $name;
-    protected $partyIdentificationId;
-    protected $postalAddress;
-    protected $physicalLocation;
-    protected $contact;
-    protected $partyTaxScheme;
-    protected $legalEntity;
+    protected ?string $name = null;
+    protected ?string $partyIdentificationId = null;
+    protected ?Address $postalAddress = null;
+    protected ?Address $physicalLocation = null;
+    protected ?Contact $contact = null;
+    protected ?PartyTaxScheme $partyTaxScheme = null;
+    protected ?LegalEntity $legalEntity = null;
+    protected ?FinancialAccount $financialAccount = null;
 
     /**
      * @return string
@@ -142,6 +143,24 @@ class Party implements XmlSerializable
     }
 
     /**
+     * @return FinancialAccount
+     */
+    public function getFinancialAccount(): ?FinancialAccount
+    {
+        return $this->financialAccount;
+    }
+
+    /**
+     * @param FinancialAccount $financialAccount
+     * @return Party
+     */
+    public function setFinancialAccount(?FinancialAccount $financialAccount): Party
+    {
+        $this->financialAccount = $financialAccount;
+        return $this;
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -185,6 +204,12 @@ class Party implements XmlSerializable
         if ($this->contact !== null) {
             $writer->write([
                 Schema::CAC . 'Contact' => $this->contact
+            ]);
+        }
+
+        if ($this->financialAccount !== null) {
+            $writer->write([
+                Schema::CAC . 'FinancialAccount' => $this->financialAccount
             ]);
         }
     }

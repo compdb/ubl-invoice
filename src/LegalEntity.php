@@ -1,15 +1,16 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class LegalEntity implements XmlSerializable
 {
-    protected $registrationName;
-    protected $companyId;
-    protected $companyIdAttributes;
+    protected ?string $registrationName = null;
+    protected ?string $companyId = null;
+    protected ?string $companyLegalForm = null;
+    protected ?array $companyIdAttributes = null;
 
     /**
      * @return string
@@ -51,6 +52,24 @@ class LegalEntity implements XmlSerializable
     }
 
     /**
+     * @return string
+     */
+    public function getCompanyLegalForm(): ?string
+    {
+        return $this->registrationName;
+    }
+
+    /**
+     * @param string $companyLegalForm
+     * @return LegalEntity
+     */
+    public function setCompanyLegalForm(?string $companyLegalForm): LegalEntity
+    {
+        $this->companyLegalForm = $companyLegalForm;
+        return $this;
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -67,6 +86,14 @@ class LegalEntity implements XmlSerializable
                     'name' => Schema::CBC . 'CompanyID',
                     'value' => $this->companyId,
                     'attributes' => $this->companyIdAttributes,
+                ],
+            ]);
+        }
+        if ($this->companyLegalForm !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'CompanyLegalForm',
+                    'value' => $this->companyLegalForm,
                 ],
             ]);
         }

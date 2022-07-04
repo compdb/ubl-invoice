@@ -5,11 +5,11 @@ namespace NumNum\UBL;
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
-class PayeeFinancialAccount implements XmlSerializable
+class FinancialAccount implements XmlSerializable
 {
-    protected $id;
-    protected $name;
-    protected $financialInstitutionBranch;
+    protected ?string $id = null;
+    protected ?string $name = null;
+    protected ?FinancialInstitutionBranch $financialInstitutionBranch = null;
 
 
     /**
@@ -22,9 +22,9 @@ class PayeeFinancialAccount implements XmlSerializable
 
     /**
      * @param string $id
-     * @return PayeeFinancialAccount
+     * @return FinancialAccount
      */
-    public function setId(?string $id): PayeeFinancialAccount
+    public function setId(?string $id): FinancialAccount
     {
         $this->id = $id;
         return $this;
@@ -40,9 +40,9 @@ class PayeeFinancialAccount implements XmlSerializable
 
     /**
      * @param string $name
-     * @return PayeeFinancialAccount
+     * @return FinancialAccount
      */
-    public function setName(?string $name): PayeeFinancialAccount
+    public function setName(?string $name): FinancialAccount
     {
         $this->name = $name;
         return $this;
@@ -58,9 +58,9 @@ class PayeeFinancialAccount implements XmlSerializable
 
     /**
      * @param FinancialInstitutionBranch $financialInstitutionBranch
-     * @return PayeeFinancialAccount
+     * @return FinancialAccount
      */
-    public function setFinancialInstitutionBranch(?FinancialInstitutionBranch $financialInstitutionBranch): PayeeFinancialAccount
+    public function setFinancialInstitutionBranch(?FinancialInstitutionBranch $financialInstitutionBranch): FinancialAccount
     {
         $this->financialInstitutionBranch = $financialInstitutionBranch;
         return $this;

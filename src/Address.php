@@ -1,18 +1,20 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Address implements XmlSerializable
 {
-    protected $streetName;
-    protected $additionalStreetName;
-    protected $buildingNumber;
-    protected $cityName;
-    protected $postalZone;
-    protected $country;
+    protected ?string $streetName = null;
+    protected ?string $additionalStreetName = null;
+    protected ?string $buildingNumber = null;
+    protected ?string $cityName = null;
+    protected ?string $postalZone = null;
+    protected ?string $countrySubentity = null;
+    protected ?array $addressLines = null;
+    protected ?Country $country = null;
 
     /**
      * @return string
@@ -50,7 +52,6 @@ class Address implements XmlSerializable
         return $this;
     }
 
-    /**
     /**
      * @return string
      */
@@ -106,6 +107,54 @@ class Address implements XmlSerializable
     }
 
     /**
+     * @return string
+     */
+    public function getCountrySubentity(): ?string
+    {
+        return $this->countrySubentity;
+    }
+
+    /**
+     * @param string $countrySubentity
+     * @return Address
+     */
+    public function setCountrySubentity(?string $countrySubentity): Address
+    {
+        $this->countrySubentity = $countrySubentity;
+        return $this;
+    }
+
+    /**
+     * @return addressLines []
+     */
+    public function getAddressLines(): ?array
+    {
+        return $this->addressLines;
+    }
+
+    /**
+     * @param string $addressLine
+     * @return Address
+     */
+    public function addAddressLine(?string $addressLine): Address
+    {
+        $this->addressLines []= $addressLine;
+        return $this;
+    }
+
+    /**
+     * @param array $addressLines
+     * @return Address
+     */
+    public function addAddressLines(?array $addressLines): Address
+    {
+        foreach ($addressLines as $addressLine) {
+            $this->addAddressLine($addressLine);
+        }
+        return $this;
+    }
+
+    /**
      * @return Country
      */
     public function getCountry(): ?Country
@@ -155,6 +204,20 @@ class Address implements XmlSerializable
             $writer->write([
                 Schema::CBC . 'PostalZone' => $this->postalZone,
             ]);
+        }
+        if ($this->countrySubentity !== null) {
+            $writer->write([
+                Schema::CBC . 'CountrySubentity' => $this->countrySubentity,
+            ]);
+        }
+        if ($this->addressLines !== null) {
+            foreach($this->addressLines as $addressLine) {
+                $writer->write([
+                    Schema::CAC . 'AddressLine' => [
+                        Schema::CBC . 'Line' => $addressLine,
+                    ]
+                ]);
+            }
         }
         if ($this->country !== null) {
             $writer->write([

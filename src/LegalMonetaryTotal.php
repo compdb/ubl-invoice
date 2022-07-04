@@ -1,17 +1,19 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
+use InvalidArgumentException;
+
 class LegalMonetaryTotal implements XmlSerializable
 {
-    protected $lineExtensionAmount;
-    protected $taxExclusiveAmount;
-    protected $taxInclusiveAmount;
-    protected $allowanceTotalAmount = 0;
-    protected $payableAmount;
+    protected ?float $lineExtensionAmount = null;
+    protected ?float $taxExclusiveAmount = null;
+    protected ?float $taxInclusiveAmount = null;
+    protected ?float $allowanceTotalAmount = null;
+    protected float $payableAmount;
 
     /**
      * @return float
@@ -90,7 +92,7 @@ class LegalMonetaryTotal implements XmlSerializable
      */
     public function getPayableAmount(): ?float
     {
-        return $this->payableAmount;
+        return $this->payableAmount ?? null;
     }
 
     /**
@@ -104,6 +106,19 @@ class LegalMonetaryTotal implements XmlSerializable
     }
 
     /**
+     * The validate function that is called during xml writing to valid the data of the object.
+     *
+     * @return void
+     * @throws InvalidArgumentException An error with information about required data that is missing to write the XML
+     */
+    public function validate()
+    {
+        if (($this->payableAmount ?? null) === null) {
+            throw new InvalidArgumentException('Missing payable amount');
+        }
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -111,42 +126,60 @@ class LegalMonetaryTotal implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
+        $this->validate();
+
+        if ($this->lineExtensionAmount !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'LineExtensionAmount',
+                    'value' => Generator::format_money($this->lineExtensionAmount),
+                    'attributes' => [
+                        'currencyID' => Generator::$currencyID
+                    ]
+                ]
+            ]);
+        }
+
+        if ($this->taxExclusiveAmount !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'TaxExclusiveAmount',
+                    'value' => Generator::format_money($this->taxExclusiveAmount),
+                    'attributes' => [
+                        'currencyID' => Generator::$currencyID
+                    ]
+                ]
+            ]);
+        }
+
+        if ($this->taxInclusiveAmount !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'TaxInclusiveAmount',
+                    'value' => Generator::format_money($this->taxInclusiveAmount),
+                    'attributes' => [
+                        'currencyID' => Generator::$currencyID
+                    ]
+                ]
+            ]);
+        }
+
+        if ($this->allowanceTotalAmount !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'AllowanceTotalAmount',
+                    'value' => Generator::format_money($this->allowanceTotalAmount),
+                    'attributes' => [
+                        'currencyID' => Generator::$currencyID
+                    ]
+                ]
+            ]);
+        }
+
         $writer->write([
             [
-                'name' => Schema::CBC . 'LineExtensionAmount',
-                'value' => number_format($this->lineExtensionAmount, 2, '.', ''),
-                'attributes' => [
-                    'currencyID' => Generator::$currencyID
-                ]
-
-            ],
-            [
-                'name' => Schema::CBC . 'TaxExclusiveAmount',
-                'value' => number_format($this->taxExclusiveAmount, 2, '.', ''),
-                'attributes' => [
-                    'currencyID' => Generator::$currencyID
-                ]
-
-            ],
-            [
-                'name' => Schema::CBC . 'TaxInclusiveAmount',
-                'value' => number_format($this->taxInclusiveAmount, 2, '.', ''),
-                'attributes' => [
-                    'currencyID' => Generator::$currencyID
-                ]
-
-            ],
-            [
-                'name' => Schema::CBC . 'AllowanceTotalAmount',
-                'value' => number_format($this->allowanceTotalAmount, 2, '.', ''),
-                'attributes' => [
-                    'currencyID' => Generator::$currencyID
-                ]
-
-            ],
-            [
                 'name' => Schema::CBC . 'PayableAmount',
-                'value' => number_format($this->payableAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->payableAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]

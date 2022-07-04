@@ -1,13 +1,13 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Country implements XmlSerializable
 {
-    protected $identificationCode;
+    protected ?string $identificationCode = null;
 
     /**
      * @return mixed
@@ -35,8 +35,10 @@ class Country implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
-        $writer->write([
-            Schema::CBC . 'IdentificationCode' => $this->identificationCode,
-        ]);
+        if ($this->identificationCode !== null) {
+            $writer->write([
+                Schema::CBC . 'IdentificationCode' => $this->identificationCode,
+            ]);
+        }
     }
 }

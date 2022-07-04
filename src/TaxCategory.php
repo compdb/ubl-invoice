@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,52 +9,39 @@ use InvalidArgumentException;
 
 class TaxCategory implements XmlSerializable
 {
-    protected $id;
-    protected $idAttributes = [
-        'schemeID' => TaxCategory::UNCL5305,
-        'schemeName' => 'Duty or tax or fee category'
-    ];
-    protected $name;
-    protected $percent;
-    protected $taxScheme;
-    protected $taxExemptionReason;
-    protected $taxExemptionReasonCode;
-
-    public const UNCL5305 = 'UNCL5305';
+    protected ?string $id = null;
+    protected ?array $idAttributes = null;
+    protected ?string $name = null;
+    protected ?float $percent = null;
+    protected TaxScheme $taxScheme;
+    protected ?array $taxExemptionReasons = null;
+    protected ?string $taxExemptionReasonCode = null;
 
     /**
      * @return string
      */
     public function getId(): ?string
     {
-        if (!empty($this->id)) {
-            return $this->id;
-        }
-
-        if ($this->getPercent() !== null) {
-            if ($this->getPercent() >= 21) {
-                return 'S';
-            } elseif ($this->getPercent() <= 21 && $this->getPercent() >= 6) {
-                return 'AA';
-            } else {
-                return 'Z';
-            }
-        }
-
-        return null;
+        return $this->id;
     }
 
     /**
      * @param string $id
+     * @return TaxCategory
+     */
+    public function setId(?string $id): TaxCategory
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    /**
      * @param array $attributes
      * @return TaxCategory
      */
-    public function setId(?string $id, $attributes = null): TaxCategory
+    public function setIdAttributes(?array $attributes): TaxCategory
     {
-        $this->id = $id;
-        if (isset($attributes)) {
-            $this->idAttributes = $attributes;
-        }
+        $this->idAttributes = $attributes;
         return $this;
     }
 
@@ -99,7 +86,7 @@ class TaxCategory implements XmlSerializable
      */
     public function getTaxScheme(): ?TaxScheme
     {
-        return $this->taxScheme;
+        return $this->taxScheme ?? null;
     }
 
     /**
@@ -113,20 +100,20 @@ class TaxCategory implements XmlSerializable
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getTaxExemptionReason(): ?string
+    public function getTaxExemptionReasons(): ?array
     {
-        return $this->taxExemptionReason;
+        return $this->taxExemptionReasons;
     }
 
     /**
      * @param string $taxExemptionReason
      * @return TaxCategory
      */
-    public function setTaxExemptionReason(?string $taxExemptionReason): TaxCategory
+    public function addTaxExemptionReason(?string $taxExemptionReason): TaxCategory
     {
-        $this->taxExemptionReason = $taxExemptionReason;
+        $this->taxExemptionReasons []= $taxExemptionReason;
         return $this;
     }
 
@@ -189,7 +176,7 @@ class TaxCategory implements XmlSerializable
             ]);
         }
         $writer->write([
-            Schema::CBC . 'Percent' => number_format($this->percent, 2, '.', ''),
+            Schema::CBC . 'Percent' => Generator::format_percent($this->percent),
         ]);
 
         if ($this->taxExemptionReasonCode !== null) {
@@ -198,13 +185,15 @@ class TaxCategory implements XmlSerializable
             ]);
         }
 
-        if ($this->taxExemptionReason !== null) {
-            $writer->write([
-                Schema::CBC . 'TaxExemptionReason' => $this->taxExemptionReason,
-            ]);
+        if ($this->taxExemptionReasons !== null) {
+            foreach ($this->taxExemptionReasons as $taxExemptionReason) {
+                $writer->write([
+                    Schema::CBC . 'TaxExemptionReason' => $taxExemptionReason,
+                ]);
+            }
         }
 
-        if ($this->taxScheme !== null) {
+        if (($this->taxScheme ?? null) !== null) {
             $writer->write([Schema::CAC . 'TaxScheme' => $this->taxScheme]);
         } else {
             $writer->write([

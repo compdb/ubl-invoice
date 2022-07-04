@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,8 +9,8 @@ use InvalidArgumentException;
 
 class InvoicePeriod implements XmlSerializable
 {
-    protected $startDate;
-    protected $endDate;
+    protected ?DateTime $startDate = null;
+    protected ?DateTime $endDate = null;
 
     /**
      * @return DateTime
@@ -71,12 +71,12 @@ class InvoicePeriod implements XmlSerializable
     {
         $this->validate();
 
-        if ($this->startDate != null) {
+        if ($this->startDate !== null) {
             $writer->write([
                 Schema::CBC . 'StartDate' => $this->startDate->format('Y-m-d'),
             ]);
         }
-        if ($this->endDate != null) {
+        if ($this->endDate !== null) {
             $writer->write([
                 Schema::CBC . 'EndDate' => $this->endDate->format('Y-m-d'),
             ]);

@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Exception;
 use Sabre\Xml\Writer;
@@ -10,7 +10,7 @@ use InvalidArgumentException;
 
 class Attachment implements XmlSerializable
 {
-    protected $filePath;
+    protected string $filePath;
 
     /**
      * @throws Exception exception when the mime type cannot be determined
@@ -18,11 +18,11 @@ class Attachment implements XmlSerializable
      */
     public function getFileMimeType(): string
     {
-        if (($mime_type = mime_content_type($this->filePath)) !== false) {
+        if (($mime_type = mime_content_type($this->getFilePath())) !== false) {
             return $mime_type;
         }
 
-        throw new Exception('Could not determine mime_type of '.$this->filePath);
+        throw new Exception('Could not determine mime_type of '.$this->getFilePath());
     }
 
     /**
@@ -30,6 +30,9 @@ class Attachment implements XmlSerializable
      */
     public function getFilePath(): ?string
     {
+        if (($this->filePath ?? null) === null) {
+            throw new InvalidArgumentException('Missing filePath');
+        }
         return $this->filePath;
     }
 
@@ -51,11 +54,7 @@ class Attachment implements XmlSerializable
      */
     public function validate()
     {
-        if ($this->filePath === null) {
-            throw new InvalidArgumentException('Missing filePath');
-        }
-
-        if (file_exists($this->filePath) === false) {
+        if (file_exists($this->getFilePath()) === false) {
             throw new InvalidArgumentException('Attachment at filePath does not exist');
         }
     }
@@ -68,7 +67,9 @@ class Attachment implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
-        $fileContents = base64_encode(file_get_contents($this->filePath));
+        $this->validate();
+
+        $fileContents = base64_encode(file_get_contents($this->getFilePath()));
         $mimeType = $this->getFileMimeType();
 
         $this->validate();
@@ -78,7 +79,7 @@ class Attachment implements XmlSerializable
             'value' => $fileContents,
             'attributes' => [
                 'mimeCode' => $mimeType,
-                'filename' => basename($this->filePath)
+                'filename' => basename($this->getFilePath())
             ]
         ]);
     }

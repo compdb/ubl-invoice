@@ -75,3 +75,6 @@ $RECYCLE.BIN/
 
 # Generated XML files from tests
 /tests/*.xml
+
+# Drafts and other notes
+.ignore/
