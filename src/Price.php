@@ -1,22 +1,22 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Price implements XmlSerializable
 {
-    protected $priceAmount;
-    protected $baseQuantity;
-    protected $unitCode = UnitCode::UNIT;
+    protected float $priceAmount;
+    protected ?float $baseQuantity = null;
+    protected ?string $unitCode = null;
 
     /**
      * @return float
      */
     public function getPriceAmount(): ?float
     {
-        return $this->priceAmount;
+        return $this->priceAmount ?? null;
     }
 
     /**
@@ -48,6 +48,16 @@ class Price implements XmlSerializable
     }
 
     /**
+     * @param float $baseQuantityAttributes
+     * @return Price
+     */
+    public function setBaseQuantityAttributes(?array $baseQuantityAttributes): Price
+    {
+        $this->baseQuantityAttributes = $baseQuantityAttributes;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getUnitCode(): ?string
@@ -67,6 +77,19 @@ class Price implements XmlSerializable
     }
 
     /**
+     * The validate function that is called during xml writing to valid the data of the object.
+     *
+     * @return void
+     * @throws InvalidArgumentException An error with information about required data that is missing to write the XML
+     */
+    public function validate()
+    {
+        if (($this->priceAmount ?? null) === null) {
+            throw new InvalidArgumentException('Missing price amount');
+        }
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -74,21 +97,28 @@ class Price implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
+        $this->validate();
+
         $writer->write([
             [
                 'name' => Schema::CBC . 'PriceAmount',
-                'value' => number_format($this->priceAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->priceAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]
-            ],
-            [
-                'name' => Schema::CBC . 'BaseQuantity',
-                'value' => number_format($this->baseQuantity, 2, '.', ''),
-                'attributes' => [
-                    'unitCode' => $this->unitCode
-                ]
             ]
         ]);
+
+        if ($this->baseQuantity !== null) {
+            $writer->write([
+                [
+                    'name' => Schema::CBC . 'BaseQuantity',
+                    'value' => Generator::format_quantity($this->baseQuantity),
+                    'attributes' => [
+                        'unitCode' => $this->unitCode
+                    ]
+                ]
+            ]);
+        }
     }
 }

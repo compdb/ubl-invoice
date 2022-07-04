@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 class Schema
 {

@@ -1,15 +1,22 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Service;
+
+use InvalidArgumentException;
 
 class Generator
 {
     public static $currencyID;
 
-    public static function invoice(Invoice $invoice, $currencyId = 'EUR')
+    public static function invoice(Invoice $invoice, $currencyId = null)
     {
+
+        if ($currencyId === null) {
+            throw new InvalidArgumentException('Missing currency id');
+        }
+
         self::$currencyID = $currencyId;
 
         $xmlService = new Service();
@@ -23,5 +30,20 @@ class Generator
         return $xmlService->write('Invoice', [
             $invoice
         ]);
+    }
+
+    public static function format_money(float $value) {
+
+        return number_format($value, 2, '.', '');
+    }
+
+    public static function format_quantity(float $value) {
+
+        return number_format($value, 3, '.', '');
+    }
+
+    public static function format_percent(float $value) {
+
+        return number_format($value, 2, '.', '');
     }
 }

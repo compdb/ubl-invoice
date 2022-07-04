@@ -1,27 +1,29 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
+use InvalidArgumentException;
+
 class AllowanceCharge implements XmlSerializable
 {
-    protected $chargeIndicator;
-    protected $allowanceChargeReasonCode;
-    protected $allowanceChargeReason;
-    protected $multiplierFactorNumeric;
-    protected $baseAmount;
-    protected $amount;
-    protected $taxTotal;
-    protected $taxCategory;
+    protected bool $chargeIndicator;
+    protected ?string $allowanceChargeReasonCode = null;
+    protected ?array $allowanceChargeReasons = null;
+    protected ?float $multiplierFactorNumeric = null;
+    protected ?float $baseAmount = null;
+    protected float $amount;
+    protected ?float $taxTotal = null;
+    protected ?array $taxCategories = null;
 
     /**
      * @return bool
      */
     public function isChargeIndicator(): bool
     {
-        return $this->chargeIndicator;
+        return $this->chargeIndicator ?? null;
     }
 
     /**
@@ -37,7 +39,7 @@ class AllowanceCharge implements XmlSerializable
     /**
      * @return int
      */
-    public function getAllowanceChargeReasonCode(): ?int
+    public function getAllowanceChargeReasonCode(): ?string
     {
         return $this->allowanceChargeReasonCode;
     }
@@ -46,18 +48,18 @@ class AllowanceCharge implements XmlSerializable
      * @param int $allowanceChargeReasonCode
      * @return AllowanceCharge
      */
-    public function setAllowanceChargeReasonCode(?int $allowanceChargeReasonCode): AllowanceCharge
+    public function setAllowanceChargeReasonCode(?string $allowanceChargeReasonCode): AllowanceCharge
     {
         $this->allowanceChargeReasonCode = $allowanceChargeReasonCode;
         return $this;
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getAllowanceChargeReason(): ?string
+    public function getAllowanceChargeReasons(): ?array
     {
-        return $this->allowanceChargeReason;
+        return $this->allowanceChargeReasons;
     }
 
     /**
@@ -66,14 +68,14 @@ class AllowanceCharge implements XmlSerializable
      */
     public function setAllowanceChargeReason(?string $allowanceChargeReason): AllowanceCharge
     {
-        $this->allowanceChargeReason = $allowanceChargeReason;
+        $this->allowanceChargeReasons []= $allowanceChargeReason;
         return $this;
     }
 
     /**
      * @return int
      */
-    public function getMultiplierFactorNumeric(): ?int
+    public function getMultiplierFactorNumeric(): ?float
     {
         return $this->multiplierFactorNumeric;
     }
@@ -82,7 +84,7 @@ class AllowanceCharge implements XmlSerializable
      * @param int $multiplierFactorNumeric
      * @return AllowanceCharge
      */
-    public function setMultiplierFactorNumeric(?int $multiplierFactorNumeric): AllowanceCharge
+    public function setMultiplierFactorNumeric(?float $multiplierFactorNumeric): AllowanceCharge
     {
         $this->multiplierFactorNumeric = $multiplierFactorNumeric;
         return $this;
@@ -93,7 +95,7 @@ class AllowanceCharge implements XmlSerializable
      */
     public function getBaseAmount(): ?float
     {
-        return $this->baseAmount;
+        return $this->baseAmount ?? null;
     }
 
     /**
@@ -125,11 +127,11 @@ class AllowanceCharge implements XmlSerializable
     }
 
     /**
-     * @return TaxCategory
+     * @return TaxCategory []
      */
-    public function getTaxCategory(): ?TaxCategory
+    public function getTaxCategories(): ?array
     {
-        return $this->taxCategory;
+        return $this->taxCategories;
     }
 
     /**
@@ -138,12 +140,12 @@ class AllowanceCharge implements XmlSerializable
      */
     public function setTaxCategory(?TaxCategory $taxCategory): AllowanceCharge
     {
-        $this->taxCategory = $taxCategory;
+        $this->taxCategories []= $taxCategory;
         return $this;
     }
 
     /**
-     * @return TaxCategory
+     * @return TaxTotal
      */
     public function getTaxtotal(): ?TaxTotal
     {
@@ -161,6 +163,23 @@ class AllowanceCharge implements XmlSerializable
     }
 
     /**
+     * The validate function that is called during xml writing to valid the data of the object.
+     *
+     * @return void
+     * @throws InvalidArgumentException An error with information about required data that is missing to write the XML
+     */
+    public function validate()
+    {
+        if (($this->chargeIndicator ?? null) === null) {
+            throw new InvalidArgumentException('Missing charge indicator');
+        }
+
+        if (($this->amount ?? null) === null) {
+            throw new InvalidArgumentException('Missing amount');
+        }
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -168,6 +187,8 @@ class AllowanceCharge implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
+        $this->validate();
+
         $writer->write([
             Schema::CBC . 'ChargeIndicator' => $this->chargeIndicator ? 'true' : 'false',
         ]);
@@ -178,10 +199,12 @@ class AllowanceCharge implements XmlSerializable
             ]);
         }
 
-        if ($this->allowanceChargeReason !== null) {
-            $writer->write([
-                Schema::CBC . 'AllowanceChargeReason' => $this->allowanceChargeReason
-            ]);
+        if ($this->allowanceChargeReasons !== null) {
+            foreach ($this->allowanceChargeReasons as $allowanceChargeReason) {
+                $writer->write([
+                    Schema::CAC . 'AllowanceChargeReason' => $allowanceChargeReason
+                ]);
+            }
         }
 
         if ($this->multiplierFactorNumeric !== null) {
@@ -200,10 +223,12 @@ class AllowanceCharge implements XmlSerializable
             ],
         ]);
 
-        if ($this->taxCategory !== null) {
-            $writer->write([
-                Schema::CAC . 'TaxCategory' => $this->taxCategory
-            ]);
+        if ($this->taxCategories !== null) {
+            foreach ($this->taxCategories as $taxCategory) {
+                $writer->write([
+                    Schema::CAC . 'TaxCategory' => $taxCategory
+                ]);
+            }
         }
 
         if ($this->taxTotal !== null) {

@@ -1,33 +1,34 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
 class Item implements XmlSerializable
 {
-    protected $description;
-    protected $name;
-    protected $buyersItemIdentification;
-    protected $sellersItemIdentification;
-    protected $classifiedTaxCategory;
+    protected ?array $descriptions = null;
+    protected ?string $name = null;
+    protected ?string $buyersItemIdentification = null;
+    protected ?string $sellersItemIdentification = null;
+    protected ?array $commodityClassifications = null;
+    protected ?array $classifiedTaxCategories = null;
 
     /**
      * @return string
      */
-    public function getDescription(): ?string
+    public function getDescriptions(): ?string
     {
-        return $this->description;
+        return $this->descriptions;
     }
 
     /**
      * @param string $description
      * @return Item
      */
-    public function setDescription(?string $description): Item
+    public function addDescription(?string $description): Item
     {
-        $this->description = $description;
+        $this->descriptions []= $description;
         return $this;
     }
 
@@ -86,20 +87,38 @@ class Item implements XmlSerializable
     }
 
     /**
+     * @return CommodityClassification
+     */
+    public function getCommodityClassifications(): ?array
+    {
+        return $this->commodityClassifications;
+    }
+
+    /**
+     * @param CommodityClassification $commodityClassification
+     * @return Item
+     */
+    public function addCommodityClassification(?CommodityClassification $commodityClassification): Item
+    {
+        $this->commodityClassifications []= $commodityClassification;
+        return $this;
+    }
+
+    /**
      * @return ClassifiedTaxCategory
      */
-    public function getClassifiedTaxCategory(): ?ClassifiedTaxCategory
+    public function getClassifiedTaxCategories(): ?array
     {
-        return $this->classifiedTaxCategory;
+        return $this->classifiedTaxCategories;
     }
 
     /**
      * @param ClassifiedTaxCategory $classifiedTaxCategory
      * @return Item
      */
-    public function setClassifiedTaxCategory(?ClassifiedTaxCategory $classifiedTaxCategory): Item
+    public function addClassifiedTaxCategory(?ClassifiedTaxCategory $classifiedTaxCategory): Item
     {
-        $this->classifiedTaxCategory = $classifiedTaxCategory;
+        $this->classifiedTaxCategories []= $classifiedTaxCategory;
         return $this;
     }
 
@@ -111,12 +130,19 @@ class Item implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
+        if ($this->descriptions !== null) {
+            foreach ($this->descriptions as $description) {
+                $writer->write([
+                    Schema::CBC . 'Description' => $description
+                ]);
+            }
+        }
+
         $writer->write([
-            Schema::CBC . 'Description' => $this->description,
             Schema::CBC . 'Name' => $this->name
         ]);
 
-        if (!empty($this->getBuyersItemIdentification())) {
+        if ($this->buyersItemIdentification !== null) {
             $writer->write([
                 Schema::CAC . 'BuyersItemIdentification' => [
                     Schema::CBC . 'ID' => $this->buyersItemIdentification
@@ -124,7 +150,7 @@ class Item implements XmlSerializable
             ]);
         }
 
-        if (!empty($this->getSellersItemIdentification())) {
+        if ($this->sellersItemIdentification !== null) {
             $writer->write([
                 Schema::CAC . 'SellersItemIdentification' => [
                     Schema::CBC . 'ID' => $this->sellersItemIdentification
@@ -132,10 +158,20 @@ class Item implements XmlSerializable
             ]);
         }
 
-        if (!empty($this->getClassifiedTaxCategory())) {
-            $writer->write([
-                Schema::CAC . 'ClassifiedTaxCategory' => $this->getClassifiedTaxCategory()
-            ]);
+        if ($this->commodityClassifications !== null) {
+            foreach ($this->commodityClassifications as $commodityClassification) {
+                $writer->write([
+                    Schema::CAC . 'CommodityClassification' => $commodityClassification
+                ]);
+            }
+        }
+
+        if ($this->classifiedTaxCategories !== null) {
+            foreach ($this->classifiedTaxCategories as $classifiedTaxCategory) {
+                $writer->write([
+                    Schema::CAC . 'ClassifiedTaxCategory' => $classifiedTaxCategory
+                ]);
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -10,8 +10,8 @@ use InvalidArgumentException;
 
 class SettlementPeriod implements XmlSerializable
 {
-    protected $startDate;
-    protected $endDate;
+    protected ?DateTime $startDate = null;
+    protected ?DateTime $endDate = null;
 
     /**
      * @return DateTime

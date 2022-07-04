@@ -1,5 +1,5 @@
 {
-    "name": "num-num/ubl-invoice",
+    "name": "compdb/ubl-invoice",
     "description": "A modern object-oriented PHP library to create valid UBL files",
     "keywords": [
         "ubl",
@@ -12,13 +12,19 @@
         "xml",
         "xml invoice"
     ],
-    "homepage": "https://github.com/num-num/ubl-invoice",
+    "homepage": "https://github.com/compdb/ubl-invoice",
     "license": "MIT",
     "authors": [
         {
             "name": "Bert Devriese",
             "email": "bert@numnum.be",
             "homepage": "https://www.numnum.be",
+            "role": "Developer"
+        },
+        {
+            "name": "Daniel Stanciu",
+            "email": "daniel@1982.ro",
+            "homepage": "https://www.1982.ro/com/",
             "role": "Developer"
         }
     ],
@@ -32,8 +38,8 @@
     },
     "autoload": {
         "psr-4": {
-            "NumNum\\UBL\\": ["src"],
-            "NumNum\\UBL\\Tests\\": ["tests"]
+            "Compdb\\UBL\\": ["src"],
+            "Compdb\\UBL\\Tests\\": ["tests"]
         }
     },
     "scripts": {

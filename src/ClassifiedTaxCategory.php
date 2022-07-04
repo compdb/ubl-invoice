@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,37 +9,20 @@ use InvalidArgumentException;
 
 class ClassifiedTaxCategory implements XmlSerializable
 {
-    protected $id;
-    protected $name;
-    protected $percent;
-    protected $taxScheme;
-    protected $taxExemptionReason;
-    protected $taxExemptionReasonCode;
-    protected $schemeID;
-    protected $schemeName;
-
-    public const UNCL5305 = 'UNCL5305';
+    protected ?string $id = null;
+    protected ?array $idAttributes = null;
+    protected ?string $name = null;
+    protected ?float $percent = null;
+    protected TaxScheme $taxScheme;
+    protected ?array $taxExemptionReasons = null;
+    protected ?string $taxExemptionReasonCode = null;
 
     /**
      * @return string
      */
     public function getId(): ?string
     {
-        if (!empty($this->id)) {
-            return $this->id;
-        }
-
-        if ($this->getPercent() !== null) {
-            if ($this->getPercent() >= 21) {
-                return 'S';
-            } elseif ($this->getPercent() <= 21 && $this->getPercent() >= 6) {
-                return 'AA';
-            } else {
-                return 'Z';
-            }
-        }
-
-        return null;
+        return $this->id;
     }
 
     /**
@@ -49,6 +32,16 @@ class ClassifiedTaxCategory implements XmlSerializable
     public function setId(?string $id): ClassifiedTaxCategory
     {
         $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @param array $attributes
+     * @return TaxCategory
+     */
+    public function setIdAttributes(?array $attributes): TaxCategory
+    {
+        $this->idAttributes = $attributes;
         return $this;
     }
 
@@ -93,7 +86,7 @@ class ClassifiedTaxCategory implements XmlSerializable
      */
     public function getTaxScheme(): ?TaxScheme
     {
-        return $this->taxScheme;
+        return $this->taxScheme ?? null;
     }
 
     /**
@@ -107,38 +100,38 @@ class ClassifiedTaxCategory implements XmlSerializable
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getSchemeID(): ?string
+    public function getTaxExemptionReasons(): ?array
     {
-        return $this->schemeID;
+        return $this->taxExemptionReasons;
     }
 
     /**
-     * @param string $id
-     * @return ClassifiedTaxCategory
+     * @param string $taxExemptionReason
+     * @return TaxCategory
      */
-    public function setSchemeID(?string $id): ClassifiedTaxCategory
+    public function addTaxExemptionReason(?string $taxExemptionReason): TaxCategory
     {
-        $this->schemeID = $id;
+        $this->taxExemptionReasons []= $taxExemptionReason;
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getSchemeName(): ?string
+    public function getTaxExemptionReasonCode(): ?string
     {
-        return $this->schemeName;
+        return $this->taxExemptionReasonCode;
     }
 
     /**
-     * @param string $name
-     * @return ClassifiedTaxCategory
+     * @param string $taxExemptionReason
+     * @return TaxCategory
      */
-    public function setSchemeName(?string $name): ClassifiedTaxCategory
+    public function setTaxExemptionReasonCode(?string $taxExemptionReasonCode): TaxCategory
     {
-        $this->schemeName = $name;
+        $this->taxExemptionReasonCode = $taxExemptionReasonCode;
         return $this;
     }
 
@@ -169,22 +162,13 @@ class ClassifiedTaxCategory implements XmlSerializable
     {
         $this->validate();
 
-        $schemeAttributes = [];
-        if ($this->schemeID !== null) {
-            $schemeAttributes['schemeID'] = $this->schemeID;
-        }
-        if ($this->schemeName !== null) {
-            $schemeAttributes['schemeName'] = $this->schemeName;
-        }
-
         $writer->write([
             [
                 'name' => Schema::CBC . 'ID',
                 'value' => $this->getId(),
-                'attributes' => $schemeAttributes
-
+                'attributes' => $this->idAttributes,
             ],
-            Schema::CBC . 'Percent' => number_format($this->percent, 2, '.', ''),
+            Schema::CBC . 'Percent' => Generator::format_percent($this->percent),
         ]);
 
         if ($this->name !== null) {
@@ -196,11 +180,18 @@ class ClassifiedTaxCategory implements XmlSerializable
         if ($this->taxExemptionReasonCode !== null) {
             $writer->write([
                 Schema::CBC . 'TaxExemptionReasonCode' => $this->taxExemptionReasonCode,
-                Schema::CBC . 'TaxExemptionReason' => $this->taxExemptionReason,
             ]);
         }
 
-        if ($this->taxScheme !== null) {
+        if ($this->taxExemptionReasons !== null) {
+            foreach ($this->taxExemptionReasons as $taxExemptionReason) {
+                $writer->write([
+                    Schema::CBC . 'TaxExemptionReason' => $taxExemptionReason,
+                ]);
+            }
+        }
+
+        if (($this->taxScheme ?? null) !== null) {
             $writer->write([Schema::CAC . 'TaxScheme' => $this->taxScheme]);
         } else {
             $writer->write([

@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,9 +9,9 @@ use InvalidArgumentException;
 
 class PartyTaxScheme implements XmlSerializable
 {
-    protected $registrationName;
-    protected $companyId;
-    protected $taxScheme;
+    protected ?string $registrationName = null;
+    protected ?string $companyId = null;
+    protected ?TaxScheme $taxScheme = null;
 
     /**
      * @return string

@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -8,16 +8,12 @@ use DateTime;
 
 class PaymentMeans implements XmlSerializable
 {
-    protected $paymentMeansCode = 1;
-    protected $paymentMeansCodeAttributes = [
-        'listID' => 'UN/ECE 4461',
-        'listName' => 'Payment Means',
-        'listURI' => 'http://docs.oasis-open.org/ubl/os-UBL-2.0-update/cl/gc/default/PaymentMeansCode-2.0.gc'];
-    protected $paymentDueDate;
-    protected $instructionId;
-    protected $instructionNote;
-    protected $paymentId;
-    protected $payeeFinancialAccount;
+    protected string $paymentMeansCode;
+    protected ?string $paymentDueDate = null;
+    protected ?string $instructionId = null;
+    protected ?string $instructionNote = null;
+    protected ?string $paymentId = null;
+    protected ?FinancialAccount $payeeFinancialAccount = null;
 
     /**
      * @return string
@@ -115,7 +111,7 @@ class PaymentMeans implements XmlSerializable
     /**
      * @return mixed
      */
-    public function getPayeeFinancialAccount(): ?PayeeFinancialAccount
+    public function getPayeeFinancialAccount(): ?FinancialAccount
     {
         return $this->payeeFinancialAccount;
     }
@@ -124,7 +120,7 @@ class PaymentMeans implements XmlSerializable
      * @param mixed $payeeFinancialAccount
      * @return PaymentMeans
      */
-    public function setPayeeFinancialAccount(?PayeeFinancialAccount $payeeFinancialAccount): PaymentMeans
+    public function setPayeeFinancialAccount(?FinancialAccount $payeeFinancialAccount): PaymentMeans
     {
         $this->payeeFinancialAccount = $payeeFinancialAccount;
         return $this;
@@ -133,9 +129,7 @@ class PaymentMeans implements XmlSerializable
     public function xmlSerialize(Writer $writer)
     {
         $writer->write([
-            'name' => Schema::CBC . 'PaymentMeansCode',
-            'value' => $this->paymentMeansCode,
-            'attributes' => $this->paymentMeansCodeAttributes
+            Schema::CBC . 'PaymentMeansCode' => $this->paymentMeansCode
         ]);
 
         if ($this->getPaymentDueDate() !== null) {

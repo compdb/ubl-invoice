@@ -1,21 +1,23 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
+use InvalidArgumentException;
+
 class OrderReference implements XmlSerializable
 {
-    protected $id;
-    protected $salesOrderId;
+    protected string $id;
+    protected ?string $salesOrderId = null;
 
     /**
      * @return string
      */
     public function getId(): string
     {
-        return $this->id;
+        return $this->id ?? null;
     }
 
     /**
@@ -47,6 +49,19 @@ class OrderReference implements XmlSerializable
     }
 
     /**
+     * The validate function that is called during xml writing to valid the data of the object.
+     *
+     * @return void
+     * @throws InvalidArgumentException An error with information about required data that is missing to write the XML
+     */
+    public function validate()
+    {
+        if (($this->id ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice id');
+        }
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      *
      * @param Writer $writer
@@ -54,9 +69,10 @@ class OrderReference implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
-        if ($this->id !== null) {
-            $writer->write([ Schema::CBC . 'ID' => $this->id ]);
-        }
+        $this->validate();
+
+        $writer->write([ Schema::CBC . 'ID' => $this->id ]);
+
         if ($this->salesOrderId !== null) {
             $writer->write([ Schema::CBC . 'SalesOrderID' => $this->salesOrderId ]);
         }

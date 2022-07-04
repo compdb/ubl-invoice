@@ -1,30 +1,32 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
 
+use InvalidArgumentException;
+
 class InvoiceLine implements XmlSerializable
 {
-    protected $id;
-    protected $invoicedQuantity;
-    protected $lineExtensionAmount;
-    protected $unitCode = 'MON';
-    protected $taxTotal;
-    protected $invoicePeriod;
-    protected $note;
-    protected $item;
-    protected $price;
-    protected $accountingCostCode;
-    protected $accountingCost;
+    protected string $id;
+    protected ?float $invoicedQuantity = null;
+    protected float $lineExtensionAmount;
+    protected ?string $unitCode = null;
+    protected ?array $taxTotals = null;
+    protected ?array $invoicePeriods = null;
+    protected ?array $notes = null;
+    protected Item $item;
+    protected ?Price $price = null;
+    protected ?string $accountingCostCode = null;
+    protected ?string $accountingCost = null;
 
     /**
      * @return string
      */
     public function getId(): ?string
     {
-        return $this->id;
+        return $this->id ?? null;
     }
 
     /**
@@ -60,7 +62,7 @@ class InvoiceLine implements XmlSerializable
      */
     public function getLineExtensionAmount(): ?float
     {
-        return $this->lineExtensionAmount;
+        return $this->lineExtensionAmount ?? null;
     }
 
     /**
@@ -74,56 +76,56 @@ class InvoiceLine implements XmlSerializable
     }
 
     /**
-     * @return TaxTotal
+     * @return TaxTotal []
      */
-    public function getTaxTotal(): ?TaxTotal
+    public function getTaxTotals(): ?array
     {
-        return $this->taxTotal;
+        return $this->taxTotals;
     }
 
     /**
      * @param TaxTotal $taxTotal
      * @return InvoiceLine
      */
-    public function setTaxTotal(?TaxTotal $taxTotal): InvoiceLine
+    public function addTaxTotal(?TaxTotal $taxTotal): InvoiceLine
     {
-        $this->taxTotal = $taxTotal;
+        $this->taxTotals []= $taxTotal;
         return $this;
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getNote(): ?string
+    public function getNotes(): ?array
     {
-        return $this->note;
+        return $this->notes;
     }
 
     /**
      * @param string $note
      * @return InvoiceLine
      */
-    public function setNote(?string $note): InvoiceLine
+    public function addNote(?string $note): InvoiceLine
     {
-        $this->note = $note;
+        $this->notes []= $note;
         return $this;
     }
 
     /**
-     * @return InvoicePeriod
+     * @return InvoicePeriod []
      */
-    public function getInvoicePeriod(): ?InvoicePeriod
+    public function getInvoicePeriods(): ?array
     {
-        return $this->invoicePeriod;
+        return $this->invoicePeriods;
     }
 
     /**
      * @param InvoicePeriod $invoicePeriod
      * @return InvoiceLine
      */
-    public function setInvoicePeriod(?InvoicePeriod $invoicePeriod)
+    public function addInvoicePeriod(?InvoicePeriod $invoicePeriod)
     {
-        $this->invoicePeriod = $invoicePeriod;
+        $this->invoicePeriods []= $invoicePeriod;
         return $this;
     }
 
@@ -132,7 +134,7 @@ class InvoiceLine implements XmlSerializable
      */
     public function getItem(): ?Item
     {
-        return $this->item;
+        return $this->item ?? null;
     }
 
     /**
@@ -218,33 +220,66 @@ class InvoiceLine implements XmlSerializable
     }
 
     /**
+     * The validate function that is called during xml writing to valid the data of the object.
+     *
+     * @return void
+     * @throws InvalidArgumentException An error with information about required data that is missing to write the XML
+     */
+    public function validate()
+    {
+        if (($this->id ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice line id');
+        }
+
+        if (($this->lineExtensionAmount ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice line extension amount');
+        }
+
+        if (($this->item ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice line item');
+        }
+
+        if (($this->invoicedQuantity ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice line quantity');
+        }
+
+        if (($this->unitCode ?? null) === null) {
+            throw new InvalidArgumentException('Missing invoice line unitCode');
+        }
+    }
+
+    /**
      * The xmlSerialize method is called during xml writing.
      * @param Writer $writer
      * @return void
      */
     public function xmlSerialize(Writer $writer)
     {
+        $this->validate();
+
         $writer->write([
             Schema::CBC . 'ID' => $this->id
         ]);
 
-        if (!empty($this->getNote())) {
-            $writer->write([
-                Schema::CBC . 'Note' => $this->getNote()
-            ]);
+        if ($this->notes !== null) {
+            foreach ($this->notes as $note) {
+                $writer->write([
+                    Schema::CBC . 'Note' => $note
+                ]);
+            }
         }
 
         $writer->write([
             [
                 'name' => Schema::CBC . 'InvoicedQuantity',
-                'value' => number_format($this->invoicedQuantity, 2, '.', ''),
+                'value' => Generator::format_quantity($this->invoicedQuantity),
                 'attributes' => [
                     'unitCode' => $this->unitCode
                 ]
             ],
             [
                 'name' => Schema::CBC . 'LineExtensionAmount',
-                'value' => number_format($this->lineExtensionAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->lineExtensionAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]
@@ -260,15 +295,19 @@ class InvoiceLine implements XmlSerializable
                 Schema::CBC . 'AccountingCost' => $this->accountingCost
             ]);
         }
-        if ($this->invoicePeriod !== null) {
-            $writer->write([
-                Schema::CAC . 'InvoicePeriod' => $this->invoicePeriod
-            ]);
+        if ($this->invoicePeriods !== null) {
+            foreach ($this->invoicePeriods as $invoicePeriod) {
+                $writer->write([
+                    Schema::CAC . 'InvoicePeriod' => $invoicePeriod
+                ]);
+            }
         }
-        if ($this->taxTotal !== null) {
-            $writer->write([
-                Schema::CAC . 'TaxTotal' => $this->taxTotal
-            ]);
+        if ($this->taxTotals !== null) {
+            foreach ($this->taxTotals as $taxTotal) {
+                $writer->write([
+                    Schema::CAC . 'TaxTotal' => $taxTotal
+                ]);
+            }
         }
         $writer->write([
             Schema::CAC . 'Item' => $this->item,
@@ -277,10 +316,6 @@ class InvoiceLine implements XmlSerializable
         if ($this->price !== null) {
             $writer->write([
                 Schema::CAC . 'Price' => $this->price
-            ]);
-        } else {
-            $writer->write([
-                Schema::CAC . 'TaxScheme' => null,
             ]);
         }
     }

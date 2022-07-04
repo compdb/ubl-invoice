@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,10 +9,10 @@ use InvalidArgumentException;
 
 class TaxSubTotal implements XmlSerializable
 {
-    protected $taxableAmount;
-    protected $taxAmount;
-    protected $taxCategory;
-    protected $percent;
+    protected ?float $taxableAmount = null;
+    protected float $taxAmount;
+    protected TaxCategory $taxCategory;
+    protected ?float $percent = null;
 
     /**
      * @return mixed
@@ -37,7 +37,7 @@ class TaxSubTotal implements XmlSerializable
      */
     public function getTaxAmount(): ?float
     {
-        return $this->taxAmount;
+        return $this->taxAmount ?? null;
     }
 
     /**
@@ -55,7 +55,7 @@ class TaxSubTotal implements XmlSerializable
      */
     public function getTaxCategory(): ?TaxCategory
     {
-        return $this->taxCategory;
+        return $this->taxCategory ?? null;
     }
 
     /**
@@ -94,15 +94,15 @@ class TaxSubTotal implements XmlSerializable
      */
     public function validate()
     {
-        if ($this->taxableAmount === null) {
+        if (($this->taxableAmount ?? null) === null) {
             throw new InvalidArgumentException('Missing taxsubtotal taxableAmount');
         }
 
-        if ($this->taxAmount === null) {
+        if (($this->taxAmount ?? null) === null) {
             throw new InvalidArgumentException('Missing taxsubtotal taxamount');
         }
 
-        if ($this->taxCategory === null) {
+        if (($this->taxCategory ?? null) === null) {
             throw new InvalidArgumentException('Missing taxsubtotal taxcategory');
         }
     }
@@ -119,14 +119,14 @@ class TaxSubTotal implements XmlSerializable
         $writer->write([
             [
                 'name' => Schema::CBC . 'TaxableAmount',
-                'value' => number_format($this->taxableAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->taxableAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]
             ],
             [
                 'name' => Schema::CBC . 'TaxAmount',
-                'value' => number_format($this->taxAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->taxAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]

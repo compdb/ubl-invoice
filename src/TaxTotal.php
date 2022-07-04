@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
@@ -9,15 +9,15 @@ use InvalidArgumentException;
 
 class TaxTotal implements XmlSerializable
 {
-    protected $taxAmount;
-    protected $taxSubTotals = [];
+    protected float $taxAmount;
+    protected ?array $taxSubTotals = null;
 
     /**
      * @return mixed
      */
     public function getTaxAmount(): ?float
     {
-        return $this->taxAmount;
+        return $this->taxAmount ?? null;
     }
 
     /**
@@ -56,7 +56,7 @@ class TaxTotal implements XmlSerializable
      */
     public function validate()
     {
-        if ($this->taxAmount === null) {
+        if (($this->taxAmount ?? null) === null) {
             throw new InvalidArgumentException('Missing taxtotal taxamount');
         }
     }
@@ -73,7 +73,7 @@ class TaxTotal implements XmlSerializable
         $writer->write([
             [
                 'name' => Schema::CBC . 'TaxAmount',
-                'value' => number_format($this->taxAmount, 2, '.', ''),
+                'value' => Generator::format_money($this->taxAmount),
                 'attributes' => [
                     'currencyID' => Generator::$currencyID
                 ]

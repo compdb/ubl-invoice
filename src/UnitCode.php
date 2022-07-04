@@ -1,6 +1,6 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 /**
  * All possible Unit Codes that can be used
@@ -20,7 +20,17 @@ class UnitCode
     const SQUARE_YARD = 'YDK';
     const SQUARE_MILE = 'MIK';
 
+    const CUBIC_METRE = 'MTQ';
+
     const LITRE = 'LTR';
+
+    const GRAM = 'GRM';
+    const KILOGRAM = 'KGM';
+
+    const BOX = 'XBX';
+    const PAIR = 'PR';
+    const SET = 'SET';
+    const ROLL = 'XRO';
 
     const SECOND = 'SEC';
     const MINUTE = 'MIN';

@@ -1,21 +1,22 @@
 <?php
 
-namespace NumNum\UBL;
+namespace Compdb\UBL;
 
 use Sabre\Xml\Writer;
 use Sabre\Xml\XmlSerializable;
+
 use DateTime;
 
 class Delivery implements XmlSerializable
 {
-    protected $actualDeliveryDate;
-    protected $deliveryLocation;
-    protected $deliveryParty;
+    protected ?DateTime $actualDeliveryDate = null;
+    protected ?Address $deliveryLocation = null;
+    protected ?Party $deliveryParty = null;
 
     /**
      * @return DateTime
      */
-    public function getActualDeliveryDate()
+    public function getActualDeliveryDate(): DateTime
     {
         return $this->actualDeliveryDate;
     }
@@ -24,7 +25,7 @@ class Delivery implements XmlSerializable
      * @param DateTime $actualDeliveryDate
      * @return Delivery
      */
-    public function setActualDeliveryDate($actualDeliveryDate): Delivery
+    public function setActualDeliveryDate(DateTime $actualDeliveryDate): Delivery
     {
         $this->actualDeliveryDate = $actualDeliveryDate;
         return $this;
@@ -33,7 +34,7 @@ class Delivery implements XmlSerializable
     /**
      * @return Address
      */
-    public function getDeliveryLocation()
+    public function getDeliveryLocation(): Address
     {
         return $this->deliveryLocation;
     }
@@ -42,7 +43,7 @@ class Delivery implements XmlSerializable
      * @param Address $deliveryLocation
      * @return Delivery
      */
-    public function setDeliveryLocation($deliveryLocation): Delivery
+    public function setDeliveryLocation(Address $deliveryLocation): Delivery
     {
         $this->deliveryLocation = $deliveryLocation;
         return $this;
@@ -51,7 +52,7 @@ class Delivery implements XmlSerializable
     /**
      * @return Party
      */
-    public function getDeliveryParty()
+    public function getDeliveryParty(): Party
     {
         return $this->deliveryParty;
     }
@@ -60,7 +61,7 @@ class Delivery implements XmlSerializable
      * @param Party $deliveryParty
      * @return Delivery
      */
-    public function setDeliveryParty($deliveryParty): Delivery
+    public function setDeliveryParty(Party $deliveryParty): Delivery
     {
         $this->deliveryParty = $deliveryParty;
         return $this;
@@ -74,17 +75,17 @@ class Delivery implements XmlSerializable
      */
     public function xmlSerialize(Writer $writer)
     {
-        if ($this->actualDeliveryDate != null) {
+        if ($this->actualDeliveryDate !== null) {
             $writer->write([
                Schema::CBC . 'ActualDeliveryDate' => $this->actualDeliveryDate->format('Y-m-d')
             ]);
         }
-        if ($this->deliveryLocation != null) {
+        if ($this->deliveryLocation !== null) {
             $writer->write([
                Schema::CAC . 'DeliveryLocation' => [ Schema::CAC . 'Address' => $this->deliveryLocation ]
             ]);
         }
-        if ($this->deliveryParty != null) {
+        if ($this->deliveryParty !== null) {
             $writer->write([
                Schema::CAC . 'DeliveryParty' => $this->deliveryParty
             ]);
