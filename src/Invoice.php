@@ -14,11 +14,11 @@ class Invoice implements XmlSerializable
     protected ?string $customizationID = null;
     protected string $id;
     protected ?bool $copyIndicator = null;
-    protected datetime $issueDate;
+    protected DateTime $issueDate;
     protected ?string $invoiceTypeCode = null;
     protected ?array $notes = null;
-    protected ?datetime $taxPointDate = null;
-    protected ?datetime $dueDate = null;
+    protected ?DateTime $taxPointDate = null;
+    protected ?DateTime $dueDate = null;
     protected ?PaymentTerms $paymentTerms = null;
     protected Party $accountingSupplierParty;
     protected Party $accountingCustomerParty;
